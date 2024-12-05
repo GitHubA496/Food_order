@@ -215,6 +215,87 @@ export const UpdateProfile = async (req :Request , res: Response, next: NextFunc
     }
 };
 
+export const AddToCart = async (req :Request , res: Response, next: NextFunction) => {
+ 
+    const customer = req.user;
+
+    if(customer){
+        const profile = await User.findById(customer._id);
+        // console.log(profile)
+        let cartItems =  Array();
+
+        const {_id,units} = <OrderInputs>req.body;
+        
+        const food = await Food.findById(_id);
+        if(food){
+            
+            if(profile !== null){
+                cartItems = profile.cart;
+                
+                if(cartItems.length > 0){
+                    let existingFood = cartItems.filter((item) => item.food._id.toString() === _id);
+                    console.log(existingFood)
+                    if(existingFood){
+                        const index = cartItems.indexOf(existingFood[0]);
+                        if(units >0){
+                            cartItems[index].units += units;
+                        }else{
+                            cartItems.splice(index,1);
+                        }
+                    }
+                    else{
+                        cartItems.push({
+                            food,
+                            units
+                        })
+                    }
+                }
+                else{
+                    cartItems.push({
+                        food ,
+                        units
+                    })
+                }
+
+                if(cartItems){
+                    profile.cart = cartItems as any;
+                    const result = await profile.save();
+                    return res.status(200).json(result.cart); 
+                }
+            } 
+                
+
+        }
+
+    }
+
+     return res.status(400).json({message:'no customer Found'})
+    }
+
+
+export const GetCart = async (req :Request , res: Response, next: NextFunction) => {
+    const customer = req.user;
+    if(customer){
+        const profile = await User.findById(customer._id).populate('cart.food');
+        if(profile !== null){
+            return res.status(200).json(profile.cart);
+        }
+    }
+    return res.status(400).json({message:'Cart is Empty'})
+}
+
+export const RemoveFromCart = async (req :Request , res: Response, next: NextFunction) => {
+    const customer = req.user;
+    if(customer){
+        const profile = await User.findById(customer._id).populate('cart.food');
+        if(profile !== null){
+            profile.cart = [] as any;
+            const result = await profile.save();
+            return res.status(200).json(result.cart);
+        }
+    }
+    return res.status(400).json({message:'Cart is already Empty'})
+}
 export const CreateOrder = async (req: Request, res: Response, NextFunction : NextFunction) => {
         const customer = req.user;
         if(customer){
@@ -226,6 +307,7 @@ export const CreateOrder = async (req: Request, res: Response, NextFunction : Ne
 
             let cartitems = [];
             let total = 0;
+            let vandorId;
 
             const foods = await Food.find().where('_id').in(cart.map(item => item._id)).exec();
 
@@ -236,21 +318,30 @@ export const CreateOrder = async (req: Request, res: Response, NextFunction : Ne
                     if(food._id == _id){
                         total += food.price * units;
                         cartitems.push({food,units,price : food.price});
-                }
+                        vandorId = food.vandorId
+                    }
             })
             })
             if(cartitems.length > 0){
                 const CurrOrder = await Order.create({
+                    vandorId:vandorId,
                     OrderId:OrderID,
                     customer:profile,
                     items:cartitems,
                     totalAmount:total,
                     orderStatus:"pending",
                     paidthrough:"cash",
-                    paymentResponse:"pending"
+                    paymentResponse:"pending",
+                    deliveryId:"",
+                    appliedOffers:false,
+                    remarks:"",
+                    offerId: null,
+                    readyTime: 45
                 })
 
                 if (CurrOrder){
+                    profile.cart = [] as any;
+
                     profile.orders.push(CurrOrder);
                     const UpdatedCustomerResponse=  await profile.save();
                     return res.status(200).json(UpdatedCustomerResponse);

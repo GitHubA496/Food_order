@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CreateOrder, GetOrder, getOrderById, GetOTP, GetProfile, UpdateProfile, UserLogin, UserSignUp, UserVerification } from "../controllers";
+import { AddToCart, CreateOrder, GetCart, GetOrder, getOrderById, GetOTP, GetProfile, RemoveFromCart, UpdateProfile, UserLogin, UserSignUp, UserVerification } from "../controllers";
 import { asyncHandler } from "./VandorRoute";
 import { Authenticate } from "../middlewares";
 const router = Router();
@@ -21,6 +21,9 @@ router.get('/profile',asyncHandler(GetProfile))
 router.patch('/profile',asyncHandler(UpdateProfile))
 
 //cart
+router.post('/cart',asyncHandler(AddToCart));
+router.get('/cart',asyncHandler(GetCart));
+router.delete('/cart/:id',asyncHandler(RemoveFromCart));
 //Payment
 
 //Order

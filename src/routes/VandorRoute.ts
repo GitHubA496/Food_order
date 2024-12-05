@@ -2,6 +2,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import {
     AddFood,
     GetFood,
+    CreateOffer,
+    GetCurrentOrder,
+    GetOffer,
+    GetOrderDetails,
+    ProcessOrder,
+    UpdateOffer,
     GetVandorProfile,
     UpdateVandorCoverImage,
     UpdateVandorProfile,
@@ -24,32 +30,13 @@ export const asyncHandler =
     };
 
 
-// const handler =  (req: Request, res: Response, next: NextFunction) => {
-//     return new Promise<void>((resolve, reject) => {
-//         console.log("handler reached");
-//         try {
-//             images(req, res, (err) => {
-//                 // console.log(" middleware images reached");
-//                 if (err) {
-//                     console.log("error:", err);
-//                     reject(err);
-//                 } else {
-//                     console.log("no errors");
-//                     console.log("calling next function");
-//                     resolve();
-//                 }
-//             });
-//         } catch (error) {
-//             reject(error);
-//         }
-//     });
-// }
+
 
 router.post('/login', asyncHandler(VandorLogin));
 
 router.use(Authenticate);
 
-router.get('/profilee', (req: Request, res: Response, next: NextFunction) => {
+router.get('/profile', (req: Request, res: Response, next: NextFunction) => {
     GetVandorProfile(req, res, next);
 });
 
@@ -59,9 +46,18 @@ router.patch('/coverimage',images, asyncHandler(UpdateVandorCoverImage));
 router.get('/service', asyncHandler(UpdateVandorService));
 
 router.post('/food',images,asyncHandler(AddFood));
-
-
 router.get('/food', asyncHandler(GetFood));
+
+//order
+router.get('/order', asyncHandler(GetCurrentOrder));
+router.put('/order/:id/process', asyncHandler(ProcessOrder));
+router.get('/order/:id', asyncHandler(GetOrderDetails));
+
+// //offers
+router.get('/offers',asyncHandler(GetOffer))
+router.post('/offer',asyncHandler(CreateOffer))
+router.put('/offer/:id',asyncHandler(UpdateOffer))
+
 
 router.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Hello Admin' });

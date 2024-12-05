@@ -5,6 +5,7 @@ import { validatePassword, GenerateSignature } from "../utility";
 import { CreateFoodInput } from "../dto";
 import { Food } from "../models/Food";
 import multer from "multer";
+import { Order } from "../models";
 export const VandorLogin = async (req: Request, res: Response, next: NextFunction) => {
     try{
         
@@ -228,3 +229,52 @@ export const GetFood = async (req: Request, res: Response, next: NextFunction) =
 }
 };
 
+export const GetCurrentOrder = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (user){
+        const orders = await Order.findOne({vandorId: user._id, orderStatus: "pending"}).populate('items.food');
+        if(orders!== null){
+            return res.status(200).json(orders);
+        }
+    }
+}
+export const GetOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+    const orderId = req.params.id;
+    if (orderId){
+        const order = await Order.findById(orderId).populate('items.food');
+        if(order!== null){
+            return res.status(200).json(order);
+        }
+    }
+}
+export const ProcessOrder = async (req: Request, res: Response, next: NextFunction) => {
+    const orderId = req.params.id;
+
+    const {status,remarks, time} = req.body
+
+    if (orderId){
+        const order = await Order.findById(orderId).populate('items.food');
+        
+        if(order!== null){
+        
+        order.orderStatus = status;
+        order.remarks = remarks;
+        if(time){
+            order.readyTime = time;}
+
+        const orderResult = await order.save();
+        return res.status(200).json(orderResult);
+        }
+    }
+}
+export const UpdateOffer = async (req: Request, res: Response, next: NextFunction) => {
+    
+}
+
+export const CreateOffer = async (req: Request, res: Response, next: NextFunction) => {
+
+
+}
+export const GetOffer = async (req: Request, res: Response, next: NextFunction) => {
+
+}

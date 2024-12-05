@@ -1,5 +1,6 @@
 import mongoose, {Schema, Document,Model} from "mongoose";
 import { Order, OrderDoc } from "./Order";
+import { Food } from "./Food";
 // import { Food } from "./Food";
 interface CustomerDoc extends Document{
     email : string;
@@ -14,6 +15,7 @@ interface CustomerDoc extends Document{
     otp_expiry: Date;
     lat: number;
     lng : number;
+    cart: [any];
     orders: [OrderDoc]
 }
 
@@ -30,6 +32,10 @@ const CustomerSchema = new Schema({
     otp_expiry: {type: Date , required : true},
     lat: {type: Number},
     lng : {type: Number},
+    cart : [{
+        food: { type: mongoose.SchemaTypes.ObjectId, ref: Food, required: true },
+        units: { type: Number, required: true },
+    }],
     orders: [{type: mongoose.SchemaTypes.ObjectId , ref: Order}]
 },
 {

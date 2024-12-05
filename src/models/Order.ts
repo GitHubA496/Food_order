@@ -3,17 +3,23 @@ import { Vandor } from "./Vandor";  // Assuming you already have this model
 import { Food } from "./Food";  // Assuming you already have this model
 
 export interface OrderDoc extends Document {
+    vandorId :string,
     OrderId :string,
     items : [any],
     totalAmount : number,
     orderDate : Date,
     paidthrough : string,
     paymentResponse : string,
-    orderStatus : string
+    orderStatus : string,
+    remarks : string,
+    deliveryId : string,
+    appliedOffers: boolean,
+    offerId: string,
+    readyTime: number
 }
 
 const OrderSchema = new Schema(
-    {
+    {   vandorId: { type: String, required: true },
         OrderId: { type: String, required: true, unique: true },
         items: [
           {
@@ -26,7 +32,12 @@ const OrderSchema = new Schema(
         orderDate: { type: Date, default: Date.now },
         paidthrough: { type: String, enum: ['cash', 'card', 'online'], required: true },
         paymentResponse: { type: String, required: true },
-        orderStatus: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
+        orderStatus: { type: String, enum: ['pending', 'accepted', 'completed', 'cancelled'], default: 'pending' },
+        remarks: { type: String },
+        deliveryId: { type: String },
+        appliedOffers: { type: Boolean, default: false },
+        offerId: { type: String },
+        readyTime: { type: Number },
       },
   {
     toJSON: {

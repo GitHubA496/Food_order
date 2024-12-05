@@ -9,7 +9,8 @@ export default async function (app: Application) {
     
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
-    app.use('/images',express.static(path.join(__dirname, 'images')));
+    const imagePath = path.join(__dirname, '../images'); 
+    app.use('/images',express.static(imagePath));
     
     app.use('/admin',AdminRoute);
     app.use('/vandor',VandorRoute);
